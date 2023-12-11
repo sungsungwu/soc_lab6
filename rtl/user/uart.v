@@ -9,6 +9,7 @@ module uart #(
   input wire    wb_clk_i,
   input wire    wb_rst_i,
   input wire    wbs_stb_i,
+  input wire 	wb_valid,
   input wire    wbs_cyc_i,
   input wire    wbs_we_i,
   input wire    [3:0] wbs_sel_i,
@@ -53,15 +54,15 @@ module uart #(
   wire tx_start_clear;
   wire tx_start;
   wire tx_busy;
-  wire wb_valid;
+  wire valid;
   wire frame_err;
   
   // 32'h3000_0000 memory regions of user project  
-  assign wb_valid = (wbs_adr_i[31:8] == 32'h3000_00) ? wbs_cyc_i && wbs_stb_i : 1'b0;
+  //assign wb_valid = (wbs_adr_i[31:8] == 32'h3000_00) ? wbs_cyc_i && wbs_stb_i : 1'b0;
 
   wire [31:0] clk_div;
   assign clk_div = 40000000 / BAUD_RATE;
-
+  assign valid = wb_valid;
   uart_receive receive(
     .rst_n      (~wb_rst_i  ),
     .clk        (wb_clk_i   ),
@@ -88,7 +89,7 @@ module uart #(
   ctrl ctrl(
 	.rst_n		(~wb_rst_i),
 	.clk		  (wb_clk_i	),
-  .i_wb_valid(wb_valid),
+  .i_wb_valid(valid),
 	.i_wb_adr	(wbs_adr_i),
 	.i_wb_we	(wbs_we_i	),
 	.i_wb_dat	(wbs_dat_i),
